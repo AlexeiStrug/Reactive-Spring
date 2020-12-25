@@ -39,7 +39,7 @@ public class ItemControllerTest {
     public List<Item> data() {
         return Arrays.asList(Item.builder().id(null).description("Some desc1").price(10.0).build(),
                 Item.builder().id(null).description("Some desc2").price(20.0).build(),
-                Item.builder().id(null).description("Some desc3").price(30.0).build(),
+                Item.builder().id("123").description("Some desc3").price(30.0).build(),
                 Item.builder().id("ABC").description("Some desc4").price(40.0).build());
     }
 
@@ -138,5 +138,23 @@ public class ItemControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Void.class);
+    }
+
+    @Test
+    public void updateItem() {
+        Item item = Item.builder().id(null).description("Some new desc1").price(100.0).build();
+
+        webTestClient.put()
+                .uri(ItemConstants.ITEM_END_POINT_V1.concat("/{id}"), "123")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(item), Item.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isNotEmpty()
+                .jsonPath("$.description").isEqualTo("Some new desc1")
+                .jsonPath("$.price").isEqualTo(100.0);
+
     }
 }
